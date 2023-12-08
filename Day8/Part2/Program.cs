@@ -60,23 +60,14 @@ while(!targetFound)
         }
 
         steps++;
-        
-        List<int> indexesToRemove = new List<int>();
 
         for (int x = currentIndexes.Count - 1; x >= 0; x--)
         {
-            int currentIndex = currentIndexes[x];
-
-            if (finishIndexes.Contains(currentIndex))
+            if (finishIndexes.Contains(currentIndexes[x]))
             {
                 cycleSizes.Add(steps);
-                indexesToRemove.Add(currentIndex);
+                currentIndexes.Remove(currentIndexes[x]);
             }
-        }
-
-        foreach (int indexToRemove in indexesToRemove)
-        {
-            currentIndexes.Remove(indexToRemove);
         }
 
         if(currentIndexes.Count == 0)
