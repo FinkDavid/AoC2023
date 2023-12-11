@@ -41,7 +41,9 @@ for (int i = 1; i <= galaxyPositions.Count; i++)
 {
     for (int j = id; j <= galaxyPositions.Count; j++)
     {
-        result += Math.Abs(galaxyPositions[i].X - galaxyPositions[j].X) + Math.Abs(galaxyPositions[i].Y - galaxyPositions[j].Y);
+        float distance = Math.Abs(galaxyPositions[i].X - galaxyPositions[j].X) + Math.Abs(galaxyPositions[i].Y - galaxyPositions[j].Y);
+        Console.WriteLine("Distance between " + i + " and " + j + ": " + distance);
+        result += distance;
     }
     id++;
 }
