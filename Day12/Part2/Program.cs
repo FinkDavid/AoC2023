@@ -6,7 +6,6 @@ int possiblePaths = 0;
 foreach(string l in lines)
 {
     string[] split = l.Split(' ');
-
     string records = split[0];
     string extendedRecords = records;
     string[] num = split[1].Split(',');
@@ -41,40 +40,49 @@ Console.WriteLine("Result: " + possiblePaths);
 
 void getNext(int depth, string input, string current, List<int> numbers)
 {
-    //Console.WriteLine(depth + "   current: " + current);
-    if(depth <= input.Length)
+    //Console.WriteLine("Current             "+ current);
+    if (depth <= input.Length)
     {
-        while(true)
+        while (true)
         {
             if(input[depth] == '?')
             {
-                if(CheckIfStillValid(numbers, current + "#"))
+                string currentSharp = current + "#";
+                string currentDot = current + ".";
+
+                if (CheckIfStillValid(numbers, currentSharp))
                 {
-                    getNext(depth + 1, input, current + "#", numbers);
+                    //Console.WriteLine("Get Next: " + currentSharp);
+                    depth++;
+                    getNext(depth, input, currentSharp, numbers);
                 }
                 else
                 {
-                    Console.WriteLine("Found unvalid path:  " + current + "#");
-                    break;
+                   //Console.WriteLine("Found invalid path: " + currentSharp);
+                   //Thread.Sleep(500);
                 }
 
-                if(CheckIfStillValid(numbers, current + "."))
+                if (CheckIfStillValid(numbers, currentDot))
                 {
-                    getNext(depth + 1, input, current + ".", numbers);
+                    //Console.WriteLine("Get Next: " + currentDot);
+                    depth++;
+                    getNext(depth, input, currentDot, numbers);
                 }
                 else
                 {
-                    Console.WriteLine("Found unvalid path:  " + current + ".");
+                    //Console.WriteLine("Found invalid path: " + currentDot);
+                    //Thread.Sleep(500);
                     break;
                 }
             }
             else
             {
+                //Console.WriteLine("NO ? ADDING MANUALLY: " + input[depth]);
                 current = current + input[depth];
                 depth++;
             }
 
-            if(depth >= input.Length)
+            if (depth >= input.Length)
             {
                 break;
             }
@@ -83,10 +91,32 @@ void getNext(int depth, string input, string current, List<int> numbers)
 
     if(current.Length == input.Length)
     {
-        possiblePaths++;
-        Console.WriteLine("Finished path    " + current);
+        bool test = true;
+        List<int> testSizes = GetSegmentSizes(current);
+        for(int i = 0; i < testSizes.Count; i++)
+        {
+            if(testSizes[i] != numbers[i])
+            {
+                test = false;
+            }
+        }
+
+        if(test)
+        {
+            possiblePaths++;
+    
+            foreach(int size in GetSegmentSizes(current))
+            {
+                Console.Write(size);
+            }
+            Console.WriteLine();
+            Console.WriteLine("Finished path    " + current + "   depth: " + depth);
+            Thread.Sleep(5000);
+        }
     }
 }
+
+
 
 bool CheckIfStillValid(List<int> numbers, string current)
 {
@@ -120,6 +150,7 @@ bool CheckIfStillValid(List<int> numbers, string current)
             break;
         }
     }
+
     return isValidArragnment;
 }
 
