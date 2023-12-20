@@ -1,138 +1,135 @@
 ﻿string[] lines = File.ReadAllLines("../input.txt");
 
 Dictionary<string, List<(string condition, string destination)>> workflows = new Dictionary<string, List<(string, string)>>();
-List<Part> parts = new List<Part>();
-List<Part> acceptedParts = new List<Part>();
 
-bool isWorkflow = true;
 foreach(string l in lines)
 {
     if(string.IsNullOrEmpty(l))
     {
-        isWorkflow = false;
+        break;
     }
     else
     {
-        if(isWorkflow)
+        string[] split = l.Split('{');
+        string workflowName = split[0];
+
+        int current = 1;
+        if(workflowName != "in")
         {
-            string[] split = l.Split('{');
-            string workflowName = split[0];
-
-            workflows.Add(workflowName, new List<(string condition, string destination)>());
-
-            string conditions = split[1].Remove(split[1].Length - 1);
-            string[] conditionsSplit = conditions.Split(',');
-
-            for(int i = 0; i < conditionsSplit.Length - 1; i++)
-            {
-                string[] conditionDestinationSplit = conditionsSplit[i].Split(':');
-                workflows[workflowName].Add((conditionDestinationSplit[0], conditionDestinationSplit[1]));
-            }
-
-            //Adding "invisible" condition to the last destination that will always be true
-            workflows[workflowName].Add(("m>0", conditionsSplit[conditionsSplit.Length - 1]));
+            workflowName += current.ToString();
         }
-        else
+        
+
+        workflows.Add(workflowName, new List<(string condition, string destination)>());
+
+        string conditions = split[1].Remove(split[1].Length - 1);
+        string[] conditionsSplit = conditions.Split(',');
+
+        for(int i = 0; i < conditionsSplit.Length - 1; i++)
         {
-            string trimmedInput = l.Trim('{', '}');
-            string[] split = trimmedInput.Split(',');
-            parts.Add(new Part());
-            foreach(string s in split)
+            string[] conditionDestinationSplit = conditionsSplit[i].Split(':');
+            string conditionDestinationName = conditionDestinationSplit[1];
+
+            if(conditionDestinationSplit[1] != "A" && conditionDestinationSplit[1] != "R")
             {
-                string name = s[0].ToString();
-                int number = int.Parse(s.Substring(2, s.Length - 2));
-                parts[parts.Count - 1].ratings.Add(name, number);
+                conditionDestinationName += "1";
             }
+
+            workflows[workflowName].Add((conditionDestinationSplit[0], conditionDestinationName));
         }
-    }
-}
 
-foreach(Part part in parts)
-{
-    string currentWorkflow = "in";
-    bool partDone = false;
-    while(!partDone)
-    {
-        //Loop over all conditions
-        for(int i = 0; i < workflows[currentWorkflow].Count; i++)
+        string test = conditionsSplit[conditionsSplit.Length - 1];
+
+        if(test != "A" && test != "R")
         {
-            bool nextCondition = false;
-            string name = workflows[currentWorkflow][i].condition[0].ToString();
-            char cond = workflows[currentWorkflow][i].condition[1];
-            int num = int.Parse(workflows[currentWorkflow][i].condition.Substring(2));
-            switch(cond)
+            test += "1";
+        }
+
+        workflows[workflowName].Add(("m>0", test));
+
+        current++;
+        if(workflows[workflowName].Count > 2)
+        {
+            string newName = workflowName.Substring(0, workflowName.Length - 1) + current;
+            workflows[workflowName].Insert(1, ("m>0", newName));
+            workflows.Add(newName, new List<(string condition, string destination)>());
+
+            for(int i = 2; i < workflows[workflowName].Count; i++)
             {
-                case '<': 
-                    if(part.ratings[name] < num)
-                    {
-                        string destination = workflows[currentWorkflow][i].destination;
-                        if(destination == "A")
-                        {
-                            acceptedParts.Add(part);
-                            partDone = true;
-                        }
-                        else if(destination == "R")
-                        {
-                            partDone = true;
-                        }
-                        else
-                        {
-                            currentWorkflow = destination;
-                        }
-                        nextCondition = true;
-                    }
-                    break;
-                case '>': 
-                    if(part.ratings[name] > num)
-                    {
-                        string destination = workflows[currentWorkflow][i].destination;
-                        if(destination == "A")
-                        {
-                            acceptedParts.Add(part);
-                            partDone = true;
-                        }
-                        else if(destination == "R")
-                        {
-                            partDone = true;
-                        }
-                        else
-                        {
-                            currentWorkflow = destination;
-                        }
-                        nextCondition = true;
-                    }
-                    break;
-                default: break;
+                workflows[newName].Add(workflows[workflowName][i]);
             }
 
-            if(nextCondition)
+            int x = 2;
+            int count = workflows[workflowName].Count;
+            for(int i = 2; i < count; i++)
             {
-                break;
+                workflows[workflowName].RemoveAt(x);
+            }
+
+            if(workflows[newName].Count > 2)
+            {
+                current++;
+                string newName2 = newName.Substring(0, newName.Length - 1) + current;
+                workflows[newName].Insert(1, ("m>0", newName2));
+                workflows.Add(newName2, new List<(string condition, string destination)>());
+
+                for(int i = 2; i < workflows[newName].Count; i++)
+                {
+                    workflows[newName2].Add(workflows[newName][i]);
+                }
+
+                count = workflows[newName].Count;
+                for(int i = 2; i < count; i++)
+                {
+                    workflows[newName].RemoveAt(x);
+                }
             }
         }
     }
 }
+long result = 0;
 
-int result = 0;
-foreach(Part p in acceptedParts)
-{
-    result += p.getSumOfValues();
-}   
+Next("in", new Dictionary<char, long>() { {'x', 0}, {'m', 0}, {'a', 0}, {'s', 0} }, new Dictionary<char, long>() { {'x', 4000}, {'m', 4000}, {'a', 4000}, {'s', 4000} }, ref result);
 
 Console.WriteLine("Result: " + result);
 
-class Part
+void Next(string current, Dictionary<char, long> startingNumbers, Dictionary<char, long> endingNumbers, ref long result)
 {
-    public Dictionary<string, int> ratings = new Dictionary<string, int>();
-
-    public int getSumOfValues()
+    if(current != "A" && current != "R")
     {
-        int sum = 0;
-        foreach (var kvp in ratings)
-        {
-            sum += kvp.Value;
-        }
+        char cond = workflows[current][0].condition[1];
+        int num = int.Parse(workflows[current][0].condition.Substring(2));
+        char letter = workflows[current][0].condition[0];
+        long oldNumber;
 
-        return sum;
+        Dictionary<char, long> startingNumbersCopy = new Dictionary<char, long>(startingNumbers);
+        Dictionary<char, long> endingNumbersCopy = new Dictionary<char, long>(endingNumbers);
+
+        switch(cond)
+        {
+            case '<':
+                oldNumber = endingNumbersCopy[letter];
+                endingNumbersCopy[letter] = num - 1;
+                Next(workflows[current][0].destination, startingNumbersCopy, endingNumbersCopy, ref result);
+                endingNumbers[letter] = oldNumber;
+                startingNumbers[letter] = num - 1;
+                Next(workflows[current][1].destination, startingNumbers, endingNumbers, ref result);
+                break;
+            case '>':
+                oldNumber = startingNumbersCopy[letter];
+                startingNumbersCopy[letter] = num;
+                Next(workflows[current][0].destination, startingNumbersCopy, endingNumbersCopy, ref result);
+                startingNumbers[letter] = oldNumber;
+                endingNumbers[letter] = num;
+                Next(workflows[current][1].destination, startingNumbers, endingNumbers, ref result);
+                break;
+        }
+    }
+    else
+    {
+        if(current == "A")
+        {
+            result += (endingNumbers['x'] - startingNumbers['x']) * (endingNumbers['m'] - startingNumbers['m']) * (endingNumbers['a'] - startingNumbers['a']) * (endingNumbers['s'] - startingNumbers['s']);
+        }
     }
 }
