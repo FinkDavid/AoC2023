@@ -2,19 +2,32 @@
 
 string[] lines = File.ReadAllLines("../input.txt");
 
+<<<<<<< HEAD
 List<List<char>> map = new List<List<char>>();
 map.Add(new List<char>());
 map[0].Add('#');
 Vector2 currentPosition = new Vector2(0, 0);
 
 int x = 0;
+=======
+List<List<char>> map = new List<List<char>>
+{
+    new List<char>()
+};
+map[0].Add('#');
+Vector2 currentPosition = new Vector2(0, 0);
+
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 foreach(string l in lines)
 {
     string[] split = l.Split(' ');
     string direction = split[0];
     int amount = int.Parse(split[1]);
 
+<<<<<<< HEAD
     //Console.WriteLine(direction + "   " + amount);
+=======
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
     switch(direction)
     {
         case "R": DigRight(amount); break;
@@ -22,6 +35,7 @@ foreach(string l in lines)
         case "L": DigLeft(amount); break;
         case "U": DigUp(amount); break;
     }
+<<<<<<< HEAD
     Console.WriteLine(x + ": " + map.Count + "/" + map[0].Count);
     /*
     for(int i = 0; i < map.Count; i++)
@@ -38,11 +52,19 @@ foreach(string l in lines)
     x++;
 }
 
+=======
+}
+
+//Add a border so the flood works correctly and then apply the flood algorithm
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 AddRow(true);
 AddRow(false);
 AddColumn(true);
 AddColumn(false);
+<<<<<<< HEAD
 /*
+=======
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 FloodFill(map);
 
 for(int i = 0; i < map.Count; i++)
@@ -58,9 +80,14 @@ for(int i = 0; i < map.Count; i++)
             map[i][j] = '.';
         }
     }
+<<<<<<< HEAD
     Console.WriteLine();
 }
 */
+=======
+}
+
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 int result = 0;
 
 for(int i = 0; i < map.Count; i++)
@@ -76,6 +103,7 @@ for(int i = 0; i < map.Count; i++)
 
 Console.WriteLine("Result: " + result);
 
+<<<<<<< HEAD
 for(int i = 0; i < map.Count; i++)
 {
     for(int j = 0; j < map[i].Count; j++)
@@ -83,6 +111,24 @@ for(int i = 0; i < map.Count; i++)
         Console.Write(map[i][j]);
     }
     Console.WriteLine();
+=======
+string filePath = "output.txt";
+WriteListToTextFile(map, filePath);
+
+void WriteListToTextFile(List<List<char>> listOfLists, string filePath)
+{
+    using (StreamWriter writer = new StreamWriter(filePath))
+    {
+        foreach (List<char> charList in listOfLists)
+        {
+            foreach (char character in charList)
+            {
+                writer.Write(character);
+            }
+            writer.WriteLine();
+        }
+    }
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 }
 
 void DigRight(int amount)
@@ -201,7 +247,11 @@ void AddRow(bool atStart)
     }
 }
 
+<<<<<<< HEAD
 static void FloodFill(List<List<char>> map)
+=======
+void FloodFill(List<List<char>> map)
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 {
     int rows = map.Count;
     int cols = map[0].Count;
@@ -218,7 +268,11 @@ static void FloodFill(List<List<char>> map)
     }
 }
 
+<<<<<<< HEAD
 static bool IsConnectedToBoundary(List<List<char>> map, int row, int col)
+=======
+bool IsConnectedToBoundary(List<List<char>> map, int row, int col)
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 {
     int rows = map.Count;
     int cols = map[0].Count;
@@ -228,14 +282,42 @@ static bool IsConnectedToBoundary(List<List<char>> map, int row, int col)
         return true;
     }
 
+<<<<<<< HEAD
     return IsConnectedToBoundaryHelper(map, row, col);
 }
 
 static bool IsConnectedToBoundaryHelper(List<List<char>> map, int row, int col)
+=======
+    Queue<(int, int)> queue = new Queue<(int, int)>();
+    queue.Enqueue((row, col));
+
+    while (queue.Count > 0)
+    {
+        var (r, c) = queue.Dequeue();
+
+        if (r < 0 || c < 0 || r >= rows || c >= cols || map[r][c] != '.')
+        {
+            continue;
+        }
+
+        map[r][c] = 'V';
+
+        queue.Enqueue((r - 1, c));
+        queue.Enqueue((r + 1, c));
+        queue.Enqueue((r, c - 1));
+        queue.Enqueue((r, c + 1));
+    }
+
+    return false;
+}
+
+void Flood(List<List<char>> map, int startRow, int startCol)
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 {
     int rows = map.Count;
     int cols = map[0].Count;
 
+<<<<<<< HEAD
     if (row < 0 || col < 0 || row >= rows || col >= cols || map[row][col] != '.')
     {
         return false;
@@ -267,4 +349,25 @@ static void Flood(List<List<char>> map, int row, int col)
     Flood(map, row + 1, col);
     Flood(map, row, col - 1);
     Flood(map, row, col + 1);
+=======
+    Stack<(int, int)> stack = new Stack<(int, int)>();
+    stack.Push((startRow, startCol));
+
+    while (stack.Count > 0)
+    {
+        var (row, col) = stack.Pop();
+
+        if (row < 0 || col < 0 || row >= rows || col >= cols || map[row][col] != '.')
+        {
+            continue;
+        }
+
+        map[row][col] = 'W';
+
+        stack.Push((row - 1, col));
+        stack.Push((row + 1, col));
+        stack.Push((row, col - 1));
+        stack.Push((row, col + 1));
+    }
+>>>>>>> 404cff6335357239feaf4b37c105aa49e1993ad6
 }
